@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans:beans xmlns="http://www.springframework.org/schema/integration"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:integration="http://www.springframework.org/schema/integration"
+	xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context.xsd
+			http://www.springframework.org/schema/integration
+			http://www.springframework.org/schema/integration/spring-integration-2.2.xsd			
+			http://www.springframework.org/schema/integration/stream
+			http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd
+			http://www.springframework.org/schema/data/mongo
+			http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd">
+	
+	<context:property-placeholder ignore-unresolvable="true" order="10" location="classpath:/conf/db.properties" />
+
+	<mongo:mongo host="${mongo.host}" port="27017">
+		<mongo:options connections-per-host="${mongo.connectionsPerHost}"
+			auto-connect-retry="${mongo.autoConnectRetry}" write-number="1" write-timeout="0" write-fsync="true" />
+	</mongo:mongo>
+	
+	<mongo:db-factory dbname="${mongo.dbname}" mongo-ref="mongo"/>
+
+	<beans:bean id="mappingContext" class="org.springframework.data.mongodb.core.mapping.MongoMappingContext" />
+
+	<beans:bean id="defaultMongoTypeMapper" class="org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper">
+		<beans:constructor-arg name="typeKey" value="#{ null }" /> 
+	</beans:bean>
+
+	<beans:bean id="mappingMongoConverter" class="org.springframework.data.mongodb.core.convert.MappingMongoConverter">
+		<beans:constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />
+		<beans:constructor-arg name="mappingContext" ref="mappingContext" />
+		<beans:property name="typeMapper" ref="defaultMongoTypeMapper" />
+	</beans:bean>
+
+	<beans:bean id="MongoOpetation" class="org.springframework.data.mongodb.core.MongoTemplate">
+		<beans:constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />
+		<beans:constructor-arg name="mongoConverter" ref="mappingMongoConverter" />
+	</beans:bean>
+
+
+</beans:beans>
